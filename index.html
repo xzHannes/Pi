@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensordaten</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .widget {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .widget h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .widget p {
+            font-size: 1.2em;
+            margin: 0;
+        }
+        .ascii-bar {
+            font-family: monospace;
+        }
+    </style>
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('/data');
+                const data = await response.json();
+
+                if (data.temperature_c !== null) {
+                    document.getElementById('temperature').innerText = `Temperatur: ${data.temperature_c.toFixed(1)} °C / ${data.temperature_f.toFixed(1)} °F`;
+                } else {
+                    document.getElementById('temperature').innerText = "Temperatur: N/A";
+                }
+
+                if (data.humidity !== null) {
+                    document.getElementById('humidity').innerText = `Luftfeuchtigkeit: ${data.humidity}%`;
+                } else {
+                    document.getElementById('humidity').innerText = "Luftfeuchtigkeit: N/A";
+                }
+
+                for (let i = 0; i < 4; i++) {
+                    const soil = data.soil_moisture[`channel_${i}`];
+                    if (soil !== null) {
+                        document.getElementById(`soil_${i}`).innerText = `Bodenfeuchtigkeit ${i + 1}: ${soil.percentage}%\n${soil.ascii_bar}`;
+                    } else {
+                        document.getElementById(`soil_${i}`).innerText = `Bodenfeuchtigkeit ${i + 1}: N/A`;
+                    }
+                }
+            } catch (error) {
+                console.error('Fehler beim Abrufen der Daten:', error);
+            }
+        }
+
+        setInterval(fetchData, 2000);
+        window.onload = fetchData;
+    </script>
+</head>
+<body>
+    <h1>Sensordaten</h1>
+    <div class="container">
+        <div class="widget" id="temperature">
+            <h2>Temperatur</h2>
+            <p>Loading...</p>
+        </div>
+        <div class="widget" id="humidity">
+            <h2>Luftfeuchtigkeit</h2>
+            <p>Loading...</p>
+        </div>
+        <div class="widget" id="soil_0">
+            <h2>Bodenfeuchtigkeit 1</h2>
+            <p class="ascii-bar">Loading...</p>
+        </div>
+        <div class="widget" id="soil_1">
+            <h2>Bodenfeuchtigkeit 2</h2>
+            <p class="ascii-bar">Loading...</p>
+        </div>
+        <div class="widget" id="soil_2">
+            <h2>Bodenfeuchtigkeit 3</h2>
+            <p class="ascii-bar">Loading...</p>
+        </div>
+        <div class="widget" id="soil_3">
+            <h2>Bodenfeuchtigkeit 4</h2>
+            <p class="ascii-bar">Loading...</p>
+        </div>
+    </div>
+</body>
+</html>
